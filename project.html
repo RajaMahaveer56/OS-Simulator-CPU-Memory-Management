@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OS Simulator: CPU & Memory Protection</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .gantt-container { display: flex; margin-top: 20px; border: 1px solid #ccc; height: 50px; overflow-x: auto; }
+        .gantt-block { display: flex; align-items: center; justify-content: center; color: white; min-width: 40px; font-size: 12px; }
+        .log { background: #2d2d2d; color: #00ff00; padding: 15px; border-radius: 5px; height: 150px; overflow-y: scroll; font-family: monospace; margin-top: 20px; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        button { padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>OS Simulator: CPU & Memory Management</h2>
+    
+    <div class="controls">
+        <div>
+            <label>Burst Time:</label> <input type="number" id="bt" value="10">
+            <label>Base Reg:</label> <input type="number" id="base" value="1000">
+            <label>Limit Reg:</label> <input type="number" id="limit" value="500">
+        </div>
+        <div>
+            <label>Memory Target:</label> <input type="number" id="target" value="1200">
+            <button onclick="runSimulation()">Start Execution</button>
+        </div>
+    </div>
+
+    <h4>Gantt Chart (Execution Timeline)</h4>
+    <div id="gantt" class="gantt-container"></div>
+
+    <h4>System Logs (Memory & Protection)</h4>
+    <div id="systemLog" class="log">> System Idle... waiting for process.</div>
+</div>
+
+<script>
+    function log(message, type = 'info') {
+        const logBox = document.getElementById('systemLog');
+        const color = type === 'error' ? 'red' : '#00ff00';
+        logBox.innerHTML += `<br><span style="color: ${color}">[${new Date().toLocaleTimeString()}] ${message}</span>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function runSimulation() {
+        const bt = parseInt(document.getElementById('bt').value);
+        const base = parseInt(document.getElementById('base').value);
+        const limit = parseInt(document.getElementById('limit').value);
+        const target = parseInt(document.getElementById('target').value);
+        const gantt = document.getElementById('gantt');
+        gantt.innerHTML = "";
+
+        // 1. Memory Protection Check (Base + Limit)
+        log("Checking Memory Access for Address: " + target);
+        if (target >= base && target < (base + limit)) {
+            log("Memory Access: OK (Within Bounds)");
+            
+            // 2. CPU Scheduling Simulation (Simple Loop)
+            for(let i = 1; i <= bt; i++) {
+                setTimeout(() => {
+                    const block = document.createElement('div');
+                    block.className = "gantt-block";
+                    block.style.width = "40px";
+                    block.style.backgroundColor = `hsl(${i * 40}, 70%, 50%)`;
+                    block.innerText = "P1";
+                    gantt.appendChild(block);
+                    log(`P1 executing... Remaining Time: ${bt - i}s`);
+                    if(i === bt) log("P1 Completed Successfully.", "info");
+                }, i * 500);
+            }
+        } else {
+            log("CRITICAL: SEGMENTATION FAULT! Target address outside process bounds.", "error");
+        }
+    }
+</script>
+
+</body>
+</html>
